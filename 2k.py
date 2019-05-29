@@ -18,6 +18,7 @@ def generate_table(k):
         for j in range(i+1, k):
             labels.append(labels[i] + labels[j])
 
+    # se k = 2 só teremos uma interacao: AB
     if k > 2:
         labels.append(interation_all)
 
@@ -30,10 +31,11 @@ def generate_table(k):
     # gerando a coluna que contem a interacao de todos os fatores. ex: ABC..
     interation_all_array = numpy.ones(2**k)
 
-    for i in range (0,k):
+    for i in range(0, k):
         interation_all_array = interation_all_array * outra_table[:, i]
 
     interation_all_array = interation_all_array.reshape(len(outra_table), 1)
+    # --
 
     # gerando os arrays de interacoes. ex: AB, AC, BC..
     labels_pos = k
@@ -54,7 +56,7 @@ def generate_table(k):
     return labels, outra_table
 
 
-if __name__ == '__main__':
+def k_fat():
     k = 0
     num_exp = 0
     try:
@@ -96,6 +98,57 @@ if __name__ == '__main__':
 
     print("-> importancia de cada fator conforme sua proporcao:\n", list(zip(labels, proporcoes_fatores)))
 
+
+def k_fat_err():
+    k = 0
+    num_exp = 0
+    num_rep = 0
+    try:
+        k = int(input(">> Numero de fatores: "))
+        num_rep = int(input(">> Numero de repeticoes do experimento: "))
+    except Exception:
+        print("entrada invalida")
+        exit(0)
+
+    num_exp = 2 ** k
+    labels, matrix = generate_table(k)
+    print("-> fatores: ", labels, "\n")
+    print("-> tabela de sinais:\n", matrix)
+
+    ys = list(eval(input(">> informe a lista de y's: ")))
+    # nesse caso vai ter q ser algo como: [(1,2,3), (4,5,6), (7,8,9)]
+    if len(ys) != num_exp:
+        print("lista de y's invalida")
+        exit(0)
+
+    print("-> valores de y: ", ys)
+    medias = map(lambda x: numpy.mean(numpy.array(x)))
+    print("-> valores medios de y: ", medias)
+
+    efeitos = []
+
+    for i in range(0, len(labels)):
+        efeito_atual = numpy.dot(matrix[:, i], ys) / num_exp
+        efeitos.append(efeito_atual)
+
+    print("-> efeitos para cada fator: ")
+    print(list(zip(labels, efeitos)))
+
+    sst = 0
+    variacao_explicada = []
+    for e in efeitos:
+        variacao_explicada_atual = num_exp * (e ** 2)
+        sst += variacao_explicada_atual
+        variacao_explicada.append(variacao_explicada_atual)
+
+    print("-> SST: ", sst)
+    proporcoes_fatores = map(lambda x: round(x / sst, 2), variacao_explicada)
+
+    print("-> importancia de cada fator conforme sua proporcao:\n", list(zip(labels, proporcoes_fatores)))
+
+
+if __name__ == '__main__':
+    k_fat_err()
 
 
 
